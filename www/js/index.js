@@ -53,7 +53,11 @@ var app =
 				var n = count;
 				count += 1;
 				var id = 'tabSwitch_' + n;
-				shows[id] = app.tabs[key];
+				shows[id] = function() {
+					app.activeTab = key;
+					app.setTabs();
+					app.tabs[key]();
+				}
 
 				var evenOdd = 'Even';
 				if( n % 2 ) evenOdd = 'Odd';
@@ -66,6 +70,9 @@ var app =
 			}
 
 			document.getElementById("tabs").innerHTML = content;
+			for( var id in shows ) {
+				document.getElementById(id).addEventListener("click", shows[id]);
+			}
 		}
 	, setMain: function( inside )
 		{
