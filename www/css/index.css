@@ -19,22 +19,32 @@
 * {
     -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
 }
-
-body {
-    -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
-    -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
-    -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
-    background-color:#E4E4E4;
-    font-family:'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
-    font-size:12px;
+html {
     width:100%;
     height:100%;
     margin:0px;
     padding:0px;
 }
+body {
+    -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
+    -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
+    -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
+    background-color: red; /* #E4E4E4; */
+    font-family:'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
+    font-size:12pt;
+    width:100%;
+    height:100%;
+    margin:0px;
+    padding:0px;
+	display: flex; 
+	flex-direction: column;
+	align-items: stretch;
+}
 
 .tabSwitcher {
-	
+	text-align: center;
+	padding: 2pt;
+	flex-grow: 1;
 }
 .tabSwitcherEven{
 	background-color: #7B9C98;
@@ -43,13 +53,20 @@ body {
 	background-color: #55817B;
 }
 .activeTab {
-	background-color: #24554F;
+	background-color: #396C65;
 }
 
 #tabs {
-	background-color: red;
+	display: flex; 
+	width:100%;
+	flex-direction: row;
+	align-items: stretch;
+	background-color: #E4E4E4;
+	font-size:18pt;
+	font-weight: bold;
 }
 
 #main {
 	background-color: #396C65;
+	flex-grow: 1;
 }
