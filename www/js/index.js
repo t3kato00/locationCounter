@@ -89,16 +89,31 @@ var app =
 			document.getElementById("main").innerHTML = inside;
 		}
 	, tabs:
-		{ "Test tab": function()
+		{ "Add place": function()
 			{
-				app.setMain( "Test tab!" );
+				var content =
+					'<table class="form">' +
+					'<tr><td>Name:</td><td><input type="text" id="apName"></tr>' +
+					'<tr><td>Radius:</td><td><input type="text" id="apRadius"></td></tr>' +
+					'</table>' +
+					'<button type="button" id="apSubmit">Submit</button>';
+				app.setMain( content );
+				var onSubmit = function () {
+					var name = document.getElementById("apName").value;
+					var radius = parseFloat(document.getElementById("apRadius").value);
+					if(isNaN(radius)) {
+						alert('Invalid radius!');
+						return;
+					}
+				}
+				document.getElementById("apSubmit").addEventListener("click", onSubmit);
 			}
-		, "Test tab 2": function()
+		, "Statistics": function()
 			{
-				app.setMain( "Test tab 2!" );
+				app.setMain( "Statistics" );
 			}
 		}
 	// Currently active tab.
-	, activeTab: "Test tab"
+	, activeTab: "Statistics"
 	};
 
