@@ -1,5 +1,8 @@
 # ANDROID / ECLIPSE
 
+# Editor temp files
+*.swp
+
 # built application files
 *.apk
 *.ap_
