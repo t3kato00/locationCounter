@@ -63,9 +63,9 @@ var app =
 				if( n % 2 ) evenOdd = 'Odd';
 
 				if( key == app.activeTab ) {
-					content += '<a id="' + id + '" class="tabSwitcher tabSwitcher' + envOdd + ' activeTab">' + key + '</span>'
+					content += '<a id="' + id + '" class="tabSwitcher tabSwitcher' + evenOdd + ' activeTab">' + key + '</span>'
 				} else {
-					content += '<a id="' + id + '" class="tabSwitcher tabSwitcher' + envOdd + '">' + key + '</span>'
+					content += '<a id="' + id + '" class="tabSwitcher tabSwitcher' + evenOdd + '">' + key + '</span>'
 				}
 			}
 
