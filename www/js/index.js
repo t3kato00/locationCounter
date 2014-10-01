@@ -45,11 +45,18 @@ var app =
 		}
 	, handlerOnTabClick: function(name,release)
 		{	return function () {
-				release();
+				release.release();
 				app.activeTab = name;
 				app.setTabs();
 				app.tabs[name]();
 			 }
+		}
+	, handlerOnTabClickRelease: function(shows)
+		{ return function () {
+				for( var id in shows ) {
+					document.getElementById(id).removeEventListener("click", shows[id]);
+				}
+			}
 		}
 	// Refresh tabs.
 	, setTabs: function()
@@ -57,11 +64,7 @@ var app =
 			var content = '';
 			var shows = {};
 			var count = 0;
-			var release = function() {
-					for( var id2 in shows ) {
-						document.getElementById(id2).removeEventListener("click", shows[id2]);
-					}
-				}
+			var release = {};
 
 			for( var key in app.tabs ) {
 				var n = count;
@@ -83,6 +86,7 @@ var app =
 			for( var id in shows ) {
 				document.getElementById(id).addEventListener("click", shows[id]);
 			}
+			release['release'] = app.handlerOnTabClickRelease(shows);
 		}
 	, setMain: function( inside )
 		{
