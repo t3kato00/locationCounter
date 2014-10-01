@@ -34,8 +34,22 @@ body {
 }
 
 .tabSwitcher {
+	
 }
-
+.tabSwitcherEven{
+	background-color: #7B9C98;
+}
+.tabSwitcherOdd{
+	background-color: #55817B;
+}
 .activeTab {
+	background-color: #24554F;
 }
 
+#tabs {
+	background-color: red;
+}
+
+#main {
+	background-color: #396C65;
+}
