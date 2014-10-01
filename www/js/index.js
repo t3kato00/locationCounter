@@ -55,12 +55,16 @@ var app =
 				var id = 'tabSwitch_' + n;
 				shows[id] = app.tabs[key];
 
+				var evenOdd = 'Even';
+				if( n % 2 ) evenOdd = 'Odd';
+
 				if( key == app.activeTab ) {
-					content += '<span id="' + id + '" class="tabSwitcher activeTab">' + key + '</span>'
+					content += '<a id="' + id + '" class="tabSwitcher tabSwitcher' + envOdd + ' activeTab">' + key + '</span>'
 				} else {
-					content += '<span id="' + id + '" class="tabSwitcher">' + key + '</span>'
+					content += '<a id="' + id + '" class="tabSwitcher tabSwitcher' + envOdd + '">' + key + '</span>'
 				}
 			}
+
 			document.getElementById("tabs").innerHTML = content;
 		}
 	, setMain: function( inside )
