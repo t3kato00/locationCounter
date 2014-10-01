@@ -43,21 +43,31 @@ var app =
 			app.setTabs();
 			app.tabs[app.activeTab]();
 		}
-	// Available tabs.
+	, handlerOnTabClick: function(name,release)
+		{	return function () {
+				release();
+				app.activeTab = name;
+				app.setTabs();
+				app.tabs[name]();
+			 }
+		}
+	// Refresh tabs.
 	, setTabs: function()
 		{
 			var content = '';
 			var shows = {};
 			var count = 0;
+			var release = function() {
+					for( var id2 in shows ) {
+						document.getElementById(id2).removeEventListener("click", shows[id2]);
+					}
+				}
+
 			for( var key in app.tabs ) {
 				var n = count;
 				count += 1;
 				var id = 'tabSwitch_' + n;
-				shows[id] = function() {
-					app.activeTab = key;
-					app.setTabs();
-					app.tabs[key]();
-				}
+				shows[id] = app.handlerOnTabClick(key,release);
 
 				var evenOdd = 'Even';
 				if( n % 2 ) evenOdd = 'Odd';
@@ -82,6 +92,10 @@ var app =
 		{ "Test tab": function()
 			{
 				app.setMain( "Test tab!" );
+			}
+		, "Test tab 2": function()
+			{
+				app.setMain( "Test tab 2!" );
 			}
 		}
 	// Currently active tab.
