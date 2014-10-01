@@ -36,7 +36,44 @@ var app =
 	// function, we must explicitly call 'app.receivedEvent(...);'
 	, onDeviceReady: function()
 		{
-			alert("Ready!");
+			window.onerror = function myErrorHandler(msg, url, line) {
+				app.setMain( '<b>Error! ' + url + ' (' + line + ')<br></b>' + msg);
+				return false;
+			}
+			app.setTabs();
+			app.tabs[app.activeTab]();
 		}
+	// Available tabs.
+	, setTabs: function()
+		{
+			var content = '';
+			var shows = {};
+			var count = 0;
+			for( var key in app.tabs ) {
+				var n = count;
+				count += 1;
+				var id = 'tabSwitch_' + n;
+				shows[id] = app.tabs[key];
+
+				if( key == app.activeTab ) {
+					content += '<span id="' + id + '" class="tabSwitcher activeTab">' + key + '</span>'
+				} else {
+					content += '<span id="' + id + '" class="tabSwitcher">' + key + '</span>'
+				}
+			}
+			document.getElementById("tabs").innerHTML = content;
+		}
+	, setMain: function( inside )
+		{
+			document.getElementById("main").innerHTML = inside;
+		}
+	, tabs:
+		{ "Test tab": function()
+			{
+				app.setMain( "Test tab!" );
+			}
+		}
+	// Currently active tab.
+	, activeTab: "Test tab"
 	};
 
