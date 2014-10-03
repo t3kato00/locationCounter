@@ -1,12 +1,20 @@
 var geoMath =
-	{ earthRadius = 6371000;
-	, deg2rad(deg): function()
+	{ earthRadius: 6371000.0
+	, deg2rad: function(deg)
 		{
 			return deg * (Math.PI/180);
 		}
-	, meters2rangle: function (meters)
+	, rad2deg: function(rad)
 		{
-			return meters/earthRadius;
+			return rad * (180/Math.PI);
+		}
+	, meters2rangle: function(meters)
+		{
+			return meters/this.earthRadius;
+		}
+	, rangle2meters: function(rangle)
+		{
+			return rangle*this.earthRadius;
 		}
 	, distance: function (coordsA, coordsB)
 	 	{
@@ -17,27 +25,25 @@ var geoMath =
 				Math.cos(deg2rad(coordsB.latitude)) * Math.cos(deg2rad(coordsA.latitude)) *
 				Math.sin(dLon/2) * Math.sin(dLon/2);
 			var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-			var d = earthRadius * c;
+			var d = this.earthRadius * c;
 			return d;
 		}
-	, placeRangle(coord, rangle)
+	, placeRangle: function(coord, rangle)
 		{
 			return { latitude: coord.latitude, longitude: coord.longitude, rangle: rangle };
 		}
-	, placePoint(coord)
+	, placePoint: function(coord)
 		{
-			return { latitude: coord.latitude, longitude: coord.longitude, rangle: meters2rangle(coord.accuracy) };
+			return { latitude: coord.latitude, longitude: coord.longitude, rangle: this.meters2rangle(coord.accuracy) };
 		}
-	, placeAdd(place, coord)
+	, placeAdd: function(place, coord)
 		{
 			var best = null;
 			var candidate = function(lat,lon) {
-				var current = { lat: lat - place.latitude, lon: lon - place.longitude }
+				var current = { lat: lat - place.latitude, lon: lon - place.longitude };
 				current.len2 = current.lat*current.lat + current.lon*current.lon;
 
-				if( best === null )
-					best = current;
-				else if( current.len2 < best.len2 )
+				if( best === null || current.len2 < best.len2 )
 					best = current;
 			}
 			var candidate2 = function(lat,lon) {
@@ -67,7 +73,10 @@ var geoMath =
 			candidate2(altCoord.latitude, altCoord.longitude);
 
 			var distRangle = Math.sqrt(best.len2);
-			var accRangle = meters2rangle(coord.accuracy)
+			alert("distRangle = " + distRangle);
+			var accRangle = this.meters2rangle(coord.accuracy)
+			alert("accRangle = " + accRangle);
+			alert("place.rangle = " + place.rangle);
 			// Handle cases where one of the areas contains the other.
 			if( accRangle + distRangle < place.rangle )
 				return place;
@@ -76,8 +85,9 @@ var geoMath =
 
 			// Calculate the new place (middle point and rangle).
 			var k = 0.5 * (-place.rangle + distRangle + accRangle) / (place.rangle + distRangle + accRangle);
-			var unit = { lat: best.lat/best.len, lon: best.lon/best.len };
-			var result = { latitude: place.latitude + k*unit.lat, longitude: place.longitude + k*unit.lon, 0.5*(place.rangle+dist.Rangle+accRangle) };
+			alert("k = " + k);
+			var unit = { lat: best.lat/distRangle, lon: best.lon/distRangle };
+			var result = { latitude: place.latitude + k*unit.lat, longitude: place.longitude + k*unit.lon, rangle: 0.5*(place.rangle+distRangle+accRangle) };
 
 			// And normalize it.
 			if( result.latitude > 0.5*Math.PI )
@@ -104,3 +114,9 @@ var geoMath =
 		}
 	}
 
+for( var member in geoMath )
+{
+	if( typeof(geoMath[member]) == 'function' )
+		geoMath[member] = geoMath[member].bind(geoMath);
+}
+alert('geoMath');

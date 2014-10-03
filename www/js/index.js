@@ -39,24 +39,16 @@ var app =
 			window.onerror = function myErrorHandler(msg, url, line) {
 				app.setMain( '<b>Error! ' + url + ' (' + line + ')<br></b>' + msg);
 				return false;
-			}
+			};
 			app.setTabs();
 			app.tabs[app.activeTab]();
 		}
-	, handlerOnTabClick: function(name,release)
+	, handlerOnTabClick: function(name)
 		{	return function () {
-				release.release();
 				app.activeTab = name;
 				app.setTabs();
 				app.tabs[name]();
 			 }
-		}
-	, handlerOnTabClickRelease: function(shows)
-		{ return function () {
-				for( var id in shows ) {
-					document.getElementById(id).removeEventListener("click", shows[id]);
-				}
-			}
 		}
 	// Refresh tabs.
 	, setTabs: function()
@@ -64,13 +56,12 @@ var app =
 			var content = '';
 			var shows = {};
 			var count = 0;
-			var release = {};
 
 			for( var key in app.tabs ) {
 				var n = count;
 				count += 1;
 				var id = 'tabSwitch_' + n;
-				shows[id] = app.handlerOnTabClick(key,release);
+				shows[id] = app.handlerOnTabClick(key);
 
 				var evenOdd = 'Even';
 				if( n % 2 ) evenOdd = 'Odd';
@@ -82,39 +73,90 @@ var app =
 				}
 			}
 
-			document.getElementById("tabs").innerHTML = content;
+			$('#tabs').html(content);
 			for( var id in shows ) {
-				document.getElementById(id).addEventListener("click", shows[id]);
+				$('#'+id).on("click", shows[id]);
 			}
-			release['release'] = app.handlerOnTabClickRelease(shows);
 		}
 	, setMain: function( inside )
 		{
-			document.getElementById("main").innerHTML = inside;
+			//document.getElementById("main").innerHTML = inside;
+			$('#main').html(inside);
 		}
 	, tabs:
 		{ "Add place": function()
 			{
 				var content =
 					'<table class="form">' +
-					'<tr><td>Name:</td><td><input type="text" id="apName"></tr>' +
+					'<tr><td>Name:</td><td><input type="text" id="apName"></td></tr>' +
 					'<tr><td>Radius:</td><td><input type="text" id="apRadius"></td></tr>' +
 					'</table>' +
 					'<button type="button" id="apSubmit">Submit</button>';
 				app.setMain( content );
-				var onSubmit = function () {
+				$('#apSubmit').on("click", function () {
 					var name = document.getElementById("apName").value;
 					var radius = parseFloat(document.getElementById("apRadius").value);
 					if(isNaN(radius)) {
 						alert('Invalid radius!');
 						return;
 					}
-				}
-				document.getElementById("apSubmit").addEventListener("click", onSubmit);
+				});
 			}
 		, "Statistics": function()
 			{
 				app.setMain( "Statistics" );
+			}
+		, "Place Debug": function()
+			{
+
+				var content =
+					'<table class="form">' +
+					'<tr><td>Latitude:</td><td><input type="text" id="apLat"></td></tr>' +
+					'<tr><td>Longitude:</td><td><input type="text" id="apLon"></td></tr>' +
+					'<tr><td>Radius:</td><td><input type="text" id="apRadius"></td></tr>' +
+					'</table>' +
+					'<button type="button" id="apSubmit">Submit</button>';
+
+				if( app['placeDebug'] )
+				{
+					var dbg = app.placeDebug;
+					content +=
+						'<table class="form">' +
+						'<tr><td>Latitude:</td><td>' + geoMath.rad2deg(dbg.latitude) + '</td></tr>' +
+						'<tr><td>Longitude:</td><td>' + geoMath.rad2deg(dbg.longitude) + '</td></tr>' +
+						'<tr><td>Radius:</td><td>' + geoMath.rangle2meters(dbg.rangle) + '</td></tr>' +
+						'</table>';
+				}
+
+				app.setMain( content );
+				$('#apSubmit').on("click", function () {
+					var latitude = geoMath.deg2rad(parseFloat(document.getElementById("apLat").value));
+					var longitude = geoMath.deg2rad(parseFloat(document.getElementById("apLon").value));
+					var radius = parseFloat(document.getElementById("apRadius").value);
+					if(isNaN(latitude) || latitude > 0.5*Math.PI || latitude < -0.5*Math.PI ) {
+						alert('Invalid latitude!');
+						return;
+					}
+					if(isNaN(longitude) || longitude > Math.PI || longitude < -Math.PI ) {
+						alert('Invalid longitude!');
+						return;
+					}
+					if(isNaN(radius)) {
+						alert('Invalid radius!');
+						return;
+					}
+
+					if( app['placeDebug'] )
+					{
+						app.placeDebug = geoMath.placeAdd(app.placeDebug, { latitude: latitude, longitude: longitude, accuracy: radius } );
+					}
+					else
+					{
+						app.placeDebug = geoMath.placePoint( { latitude: latitude, longitude: longitude, accuracy: radius } );
+					}
+
+					app.tabs['Place Debug']();
+				});
 			}
 		}
 	// Currently active tab.
