@@ -1,5 +1,5 @@
 var geoMath =
-	{ earthRadius: 6371000.0
+	{ earthRadius: 6371009 
 	, deg2rad: function(deg)
 		{
 			return deg * (Math.PI/180);
@@ -34,7 +34,7 @@ var geoMath =
 		}
 	, distance: function (coordsA, coordsB)
 		{
-			return this.rangle2meters(this.nvectsRangle(this.coords2nvect(coordsA),this.coords2nvect(coordsB)));
+			return this.rangle2meters(this.nvectsRangle(this.coords2nvect(coordsA), this.coords2nvect(coordsB)));
 		}
 	 	/*{
 			// This seemed to give incorrect results.
@@ -78,14 +78,15 @@ var geoMath =
 
 			var nvc = [nva[0]+nvb[0],nva[1]+nvb[1],nva[2]+nvb[2]];
 			if( nvc[0] == 0 && nvc[1] == 0 && nvc[2] == 0)
-				return { latitude: 0, longitude: 0, rangle: Math.PI }; // We have selected two points on the opposite sides of earth and thus the whole globe.
+				// We have selected two points on the opposite sides of earth and thus the whole globe.
+				return { latitude: 0, longitude: 0, rangle: Math.PI };
 			var k = 1 / Math.sqrt(nvc[0]*nvc[0]+nvc[1]*nvc[1]+nvc[2]*nvc[2]);
 			nvc[0] *= k;
 			nvc[1] *= k;
 			nvc[2] *= k;
 
 			var result = this.nvect2coords(nvc);
-			result.rangle = 0.5*(a.rangle + distRangle + b.rangle);
+			result.rangle = Math.min(Math.PI, 0.5*(a.rangle + distRangle + b.rangle));
 			return result;
 		}
 	}

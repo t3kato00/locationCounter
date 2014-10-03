@@ -44,11 +44,15 @@ var app =
 			app.tabs[app.activeTab]();
 		}
 	, handlerOnTabClick: function(name)
-		{	return function () {
+		{	return function()
+			{
+				if( app.activeTab == name )
+					return;
+
 				app.activeTab = name;
 				app.setTabs();
 				app.tabs[name]();
-			 }
+			}
 		}
 	// Refresh tabs.
 	, setTabs: function()
@@ -108,6 +112,9 @@ var app =
 			}
 		, "Debug": function()
 			{
+				var sect = function(text) {
+					return '<h2>' + text + '</h2>';
+				}
 				var head = function(text) {
 					return '<h3>' + text + '</h3>';
 				}
@@ -124,14 +131,19 @@ var app =
 					result += '</table>';
 					return result;
 				}
-				app.setMain(
+				var contents = "";
+
+				//if(false)
+				contents +=
+					sect("GeoMath") +
 					head("Test1") + coords(geoMath.nvect2coords(geoMath.coords2nvect({latitude: Math.PI/4, longitude: Math.PI/8}))) +
 					head("Test2") + coords(geoMath.placePlus({latitude:0, longitude:0, rangle: 0},{latitude:Math.PI/2, longitude:0, rangle: 0})) +
 					head("Test3") + coords(geoMath.placePlus({latitude:0, longitude:0, rangle: 0},{latitude: geoMath.meters2rangle(2000), longitude:0, rangle: 0})) +
 					head("Test4") + geoMath.distance({latitude:0, longitude:0},{latitude: geoMath.meters2rangle(2000), longitude:0}) + "<br>Should be 2000." +
 					head("Test5") + coords(geoMath.nvect2coords([0,0,1])) +
-					head("Test6") + coords(geoMath.nvect2coords([0,0,-1]))
-					);
+					head("Test6") + coords(geoMath.nvect2coords([0,0,-1]));
+
+				app.setMain( contents );
 			}
 		}
 	// Currently active tab.
