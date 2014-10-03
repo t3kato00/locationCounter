@@ -16,107 +16,77 @@ var geoMath =
 		{
 			return rangle*this.earthRadius;
 		}
+	, coords2nvect: function(coords)
+		{
+			return [Math.cos(coords.latitude)*Math.cos(coords.longitude), Math.cos(coords.latitude)*Math.sin(coords.longitude), Math.sin(coords.latitude)];
+		}
+	, nvect2coords: function(nv)
+		{
+			if(nv[0] == 0 && nv[1] == 0)
+				return { latitude: Math.atan2(nv[2],0), longitude: 0 };
+			else
+				return { latitude: Math.atan2(nv[2],Math.sqrt(nv[0]*nv[0] + nv[1]*nv[1])), longitude: Math.atan2(nv[1], nv[0]) };
+		}
+	, nvectsRangle: function(nva,nvb)
+		{
+			var q = [nva[1]*nvb[2]-nva[2]*nvb[1], nva[2]*nvb[0]-nva[0]*nvb[2], nva[0]*nvb[1]-nva[1]*nvb[0]]
+			return Math.atan2( Math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2]), nva[0]*nvb[0] + nva[1]*nvb[1] + nva[2]*nvb[2]);
+		}
 	, distance: function (coordsA, coordsB)
-	 	{
-			var dLat = deg2rad(coordsA.latitude-coordsB.latitude);
-			var dLon = deg2rad(coordsA.longitude-coordsB.longitude);
+		{
+			return this.rangle2meters(this.nvectsRangle(this.coords2nvect(coordsA),this.coords2nvect(coordsB)));
+		}
+	 	/*{
+			// This seemed to give incorrect results.
+			var dLat = this.deg2rad(coordsA.latitude-coordsB.latitude);
+			var dLon = this.deg2rad(coordsA.longitude-coordsB.longitude);
 			var a =
 				Math.sin(dLat/2) * Math.sin(dLat/2) +
-				Math.cos(deg2rad(coordsB.latitude)) * Math.cos(deg2rad(coordsA.latitude)) *
+				Math.cos(this.deg2rad(coordsB.latitude)) * Math.cos(this.deg2rad(coordsA.latitude)) *
 				Math.sin(dLon/2) * Math.sin(dLon/2);
 			var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 			var d = this.earthRadius * c;
 			return d;
-		}
+		}*/
 	, placeRangle: function(coord, rangle)
 		{
 			return { latitude: coord.latitude, longitude: coord.longitude, rangle: rangle };
 		}
 	, placePoint: function(coord)
 		{
-			return { latitude: coord.latitude, longitude: coord.longitude, rangle: this.meters2rangle(coord.accuracy) };
+			var result = { latitude: coord.latitude, longitude: coord.longitude, rangle: 0 };
+			if('accuracy' in coord)
+				result.rangle = this.meters2rangle(coord.accuracy);
+			return result;
 		}
-	, placeAdd: function(place, coord)
+	, nvectsRangle: function(nva,nvb)
 		{
-			var best = null;
-			var candidate = function(lat,lon) {
-				var current = { lat: lat - place.latitude, lon: lon - place.longitude };
-				current.len2 = current.lat*current.lat + current.lon*current.lon;
+			var q = [nva[1]*nvb[2]-nva[2]*nvb[1], nva[2]*nvb[0]-nva[0]*nvb[2], nva[0]*nvb[1]-nva[1]*nvb[0]]
+			return Math.atan2( Math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2]), nva[0]*nvb[0] + nva[1]*nvb[1] + nva[2]*nvb[2]);
+		}
+	, placePlus: function(a, b)
+		{
+			var nva = this.coords2nvect(a);
+			var nvb = this.coords2nvect(b);
 
-				if( best === null || current.len2 < best.len2 )
-					best = current;
-			}
-			var candidate2 = function(lat,lon) {
-				candidate(lat,lon);
+			var distRangle = this.nvectsRangle(nva,nvb);
 
-				if(place.longitude < 0)
-					lon -= 2*Math.PI;
-				else
-					lon += 2*Math.PI;
+			if( a.rangle + distRangle < b.rangle )
+				return b; // b contains a.
+			if( b.rangle + distRangle < a.rangle )
+				return a; // a contains b.
 
-				candidate(lat,lon);
-			}
+			var nvc = [nva[0]+nvb[0],nva[1]+nvb[1],nva[2]+nvb[2]];
+			if( nvc[0] == 0 && nvc[1] == 0 && nvc[2] == 0)
+				return { latitude: 0, longitude: 0, rangle: Math.PI }; // We have selected two points on the opposite sides of earth and thus the whole globe.
+			var k = 1 / Math.sqrt(nvc[0]*nvc[0]+nvc[1]*nvc[1]+nvc[2]*nvc[2]);
+			nvc[0] *= k;
+			nvc[1] *= k;
+			nvc[2] *= k;
 
-			// Calculate the flipped coordinate.
-			var altCoord = {};
-			if( coord.latitude < 0 )
-				altCoord.latitude = -Math.PI - coord.latitude;
-			else
-				altCoord.latitude = Math.PI - coord.latitude;
-			if( coord.longitude < 0 )
-				altCoord.longitude = coord.longitude + Math.PI;
-			else
-				altCoord.longitude = coord.longitude - Math.PI;
-
-			// Calculate shortest anglevector to coordinate alternates.
-			candidate2(coord.latitude, coord.longitude);
-			candidate2(altCoord.latitude, altCoord.longitude);
-
-			var distRangle = Math.sqrt(best.len2);
-			alert("distRangle = " + distRangle);
-			var accRangle = this.meters2rangle(coord.accuracy)
-			alert("accRangle = " + accRangle);
-			alert("place.rangle = " + place.rangle);
-			// Handle cases where one of the areas contains the other.
-			if( accRangle + distRangle < place.rangle )
-				return place;
-			else if( place.rangle + distRangle < accRangle )
-				return { latitude: best.lat, longitude: best.lon, rangle: accRangle };
-
-			// Calculate the new place (middle point and rangle).
-			var k = 0.5 * (-place.rangle + distRangle + accRangle) / (place.rangle + distRangle + accRangle);
-			alert("k = " + k);
-			var unit = { lat: best.lat/distRangle, lon: best.lon/distRangle };
-			var result = { latitude: place.latitude + k*unit.lat, longitude: place.longitude + k*unit.lon, rangle: 0.5*(place.rangle+distRangle+accRangle) };
-
-			// And normalize it.
-			if( result.latitude > 0.5*Math.PI )
-			{
-				result.latitude = Math.PI - result.latitude;
-				if( result.longitude < 0 )
-					result.longitude = result.longitude + Math.PI;
-				else
-					result.longitude = result.longitude - Math.PI;
-			}
-			else if( result.latitude < -0.5*Math.PI )
-			{
-				result.latitude = -Math.PI - result.latitude;
-				if( result.longitude < 0 )
-					result.longitude = result.longitude + Math.PI;
-				else
-					result.longitude = result.longitude - Math.PI;
-			} else if( result.longitude < -Math.PI )
-				result.longitude += 2*Math.PI;
-			else if( result.longitude > Math.PI )
-				result.longitude -= 2*Math.PI;
-
+			var result = this.nvect2coords(nvc);
+			result.rangle = 0.5*(a.rangle + distRangle + b.rangle);
 			return result;
 		}
 	}
 
-for( var member in geoMath )
-{
-	if( typeof(geoMath[member]) == 'function' )
-		geoMath[member] = geoMath[member].bind(geoMath);
-}
-alert('geoMath');

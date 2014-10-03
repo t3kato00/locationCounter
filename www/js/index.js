@@ -106,57 +106,32 @@ var app =
 			{
 				app.setMain( "Statistics" );
 			}
-		, "Place Debug": function()
+		, "Debug": function()
 			{
-
-				var content =
-					'<table class="form">' +
-					'<tr><td>Latitude:</td><td><input type="text" id="apLat"></td></tr>' +
-					'<tr><td>Longitude:</td><td><input type="text" id="apLon"></td></tr>' +
-					'<tr><td>Radius:</td><td><input type="text" id="apRadius"></td></tr>' +
-					'</table>' +
-					'<button type="button" id="apSubmit">Submit</button>';
-
-				if( app['placeDebug'] )
-				{
-					var dbg = app.placeDebug;
-					content +=
-						'<table class="form">' +
-						'<tr><td>Latitude:</td><td>' + geoMath.rad2deg(dbg.latitude) + '</td></tr>' +
-						'<tr><td>Longitude:</td><td>' + geoMath.rad2deg(dbg.longitude) + '</td></tr>' +
-						'<tr><td>Radius:</td><td>' + geoMath.rangle2meters(dbg.rangle) + '</td></tr>' +
-						'</table>';
+				var head = function(text) {
+					return '<h3>' + text + '</h3>';
 				}
+				var coords = function(coords) {
+					var result = '<table>' +
+						'<tr><td>Latitude</td><td>' + geoMath.rad2deg(coords.latitude) + '</td></tr>' +
+						'<tr><td>Longitude</td><td>' + geoMath.rad2deg(coords.longitude) + '</td></tr>';
 
-				app.setMain( content );
-				$('#apSubmit').on("click", function () {
-					var latitude = geoMath.deg2rad(parseFloat(document.getElementById("apLat").value));
-					var longitude = geoMath.deg2rad(parseFloat(document.getElementById("apLon").value));
-					var radius = parseFloat(document.getElementById("apRadius").value);
-					if(isNaN(latitude) || latitude > 0.5*Math.PI || latitude < -0.5*Math.PI ) {
-						alert('Invalid latitude!');
-						return;
-					}
-					if(isNaN(longitude) || longitude > Math.PI || longitude < -Math.PI ) {
-						alert('Invalid longitude!');
-						return;
-					}
-					if(isNaN(radius)) {
-						alert('Invalid radius!');
-						return;
-					}
+					if('accuracy' in coords)
+						result += '<tr><td>Radius</td><td>' + coords.accurary + '</td></tr>';
+					else if('rangle' in coords)
+						result += '<tr><td>Radius</td><td>' + geoMath.rangle2meters(coords.rangle) + '</td></tr>';
 
-					if( app['placeDebug'] )
-					{
-						app.placeDebug = geoMath.placeAdd(app.placeDebug, { latitude: latitude, longitude: longitude, accuracy: radius } );
-					}
-					else
-					{
-						app.placeDebug = geoMath.placePoint( { latitude: latitude, longitude: longitude, accuracy: radius } );
-					}
-
-					app.tabs['Place Debug']();
-				});
+					result += '</table>';
+					return result;
+				}
+				app.setMain(
+					head("Test1") + coords(geoMath.nvect2coords(geoMath.coords2nvect({latitude: Math.PI/4, longitude: Math.PI/8}))) +
+					head("Test2") + coords(geoMath.placePlus({latitude:0, longitude:0, rangle: 0},{latitude:Math.PI/2, longitude:0, rangle: 0})) +
+					head("Test3") + coords(geoMath.placePlus({latitude:0, longitude:0, rangle: 0},{latitude: geoMath.meters2rangle(2000), longitude:0, rangle: 0})) +
+					head("Test4") + geoMath.distance({latitude:0, longitude:0},{latitude: geoMath.meters2rangle(2000), longitude:0}) + "<br>Should be 2000." +
+					head("Test5") + coords(geoMath.nvect2coords([0,0,1])) +
+					head("Test6") + coords(geoMath.nvect2coords([0,0,-1]))
+					);
 			}
 		}
 	// Currently active tab.

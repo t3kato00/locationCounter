@@ -44,6 +44,7 @@ body {
 .tabSwitcher {
 	text-align: center;
 	padding: 2pt;
+	margin: 0;
 	flex-grow: 1;
 }
 .tabSwitcherEven{
@@ -59,14 +60,24 @@ body {
 #tabs {
 	display: flex; 
 	width:100%;
+	margin: 0;
+	padding: 0;
 	flex-direction: row;
 	align-items: stretch;
 	background-color: #E4E4E4;
-	font-size:16pt;
+	font-size:14pt;
 	font-weight: bold;
 }
 
 #main {
+	height: 0;
+	overflow: visible;
+}
+
+#mainContainer {
+	overflow-x: hidden;
+	overflow-y: scroll;
+	-webkit-overflow-scrolling: touch;
 	background-color: #396C65;
 	flex-grow: 1;
 }
