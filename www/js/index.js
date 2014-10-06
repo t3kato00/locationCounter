@@ -36,12 +36,35 @@ var app =
 	// function, we must explicitly call 'app.receivedEvent(...);'
 	, onDeviceReady: function()
 		{
+			app.positionStatus = '';
 			window.onerror = function myErrorHandler(msg, url, line) {
 				app.setMain( '<b>Error! ' + url + ' (' + line + ')<br></b>' + msg);
 				return false;
 			};
+			app.setPosition('Pending', 'pending');
 			app.setTabs();
 			app.tabs[app.activeTab]();
+		}
+	, setPosition: function( inside, style )
+		{
+			var elem = $('#position');
+			if( !inside )
+			{
+				elem.slideUp( function() { elem.html('') } );
+				return;
+			}
+
+			style = style || '';
+			if( style != app.positionStatus )
+			{
+				if( app.positionStatus != '' )
+					elem.removeClass(app.positionStatus);
+				if( style != '' ) 
+					elem.addClass(style);
+				app.positionStatus = style;
+			}
+
+			elem.html(inside).slideDown();
 		}
 	, handlerOnTabClick: function(name)
 		{	return function()
@@ -143,7 +166,16 @@ var app =
 					head("Test5") + coords(geoMath.nvect2coords([0,0,1])) +
 					head("Test6") + coords(geoMath.nvect2coords([0,0,-1]));
 
+				contents +=
+					sect("Position") +
+					head("Test") + '<a id="normalPos">normal</a> <a id="errorPos">error</a> <a id="pendingPos">pending</a> <a id="foundPos">found</a> <a id="clearPos">clear</a>';
+
 				app.setMain( contents );
+				$('#normalPos').on("click", function() { app.setPosition('Test') });
+				$('#errorPos').on("click", function() { app.setPosition('Error', 'error') });
+				$('#pendingPos').on("click", function() { app.setPosition('Pending', 'pending') });
+				$('#foundPos').on("click", function() { app.setPosition('Found', 'found') });
+				$('#clearPos').on("click", function() { app.setPosition() });
 			}
 		}
 	// Currently active tab.

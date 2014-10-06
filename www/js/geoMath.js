@@ -27,6 +27,7 @@ var geoMath =
 			else
 				return { latitude: Math.atan2(nv[2],Math.sqrt(nv[0]*nv[0] + nv[1]*nv[1])), longitude: Math.atan2(nv[1], nv[0]) };
 		}
+	// Gives the angle between nva and nvb.
 	, nvectsRangle: function(nva,nvb)
 		{
 			var q = [nva[1]*nvb[2]-nva[2]*nvb[1], nva[2]*nvb[0]-nva[0]*nvb[2], nva[0]*nvb[1]-nva[1]*nvb[0]]

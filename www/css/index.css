@@ -57,6 +57,27 @@ body {
 	background-color: #396C65;
 }
 
+#position {
+	display: none; 
+	width:100%;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+	font-size: 16pt;
+	font-weight: bold;
+}
+
+#position.error {
+	background-color: #FF0000;
+}
+#position.pending {
+	background-color: #FFFF00;
+}
+#position.found {
+	background-color: #30D030;
+}
+
+
 #tabs {
 	display: flex; 
 	width:100%;
@@ -81,3 +102,4 @@ body {
 	background-color: #396C65;
 	flex-grow: 1;
 }
+
