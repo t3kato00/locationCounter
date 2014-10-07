@@ -33,9 +33,10 @@ var geoMath =
 			var q = [nva[1]*nvb[2]-nva[2]*nvb[1], nva[2]*nvb[0]-nva[0]*nvb[2], nva[0]*nvb[1]-nva[1]*nvb[0]]
 			return Math.atan2( Math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2]), nva[0]*nvb[0] + nva[1]*nvb[1] + nva[2]*nvb[2]);
 		}
+	// Negative distance means the areas intersect.
 	, distance: function (coordsA, coordsB)
 		{
-			return this.rangle2meters(this.nvectsRangle(this.coords2nvect(coordsA), this.coords2nvect(coordsB)));
+			return this.rangle2meters(this.nvectsRangle(this.coords2nvect(coordsA), this.coords2nvect(coordsB)) - coordsA.rangle - coordsB.rangle);
 		}
 	 	/*{
 			// This seemed to give incorrect results.
@@ -59,11 +60,6 @@ var geoMath =
 			if('accuracy' in coord)
 				result.rangle = this.meters2rangle(coord.accuracy);
 			return result;
-		}
-	, nvectsRangle: function(nva,nvb)
-		{
-			var q = [nva[1]*nvb[2]-nva[2]*nvb[1], nva[2]*nvb[0]-nva[0]*nvb[2], nva[0]*nvb[1]-nva[1]*nvb[0]]
-			return Math.atan2( Math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2]), nva[0]*nvb[0] + nva[1]*nvb[1] + nva[2]*nvb[2]);
 		}
 	, placePlus: function(a, b)
 		{
