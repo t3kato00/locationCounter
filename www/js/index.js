@@ -41,7 +41,7 @@ var app =
 				app.setMain( '<b>Error! ' + url + ' (' + line + ')<br></b>' + msg);
 				return false;
 			};
-			app.setPosition('Pending', 'pending');
+			app.initializeGeoLocation();
 			app.refreshTabs();
 			app.refreshActiveTab();
 			app.db = { nextId: 0, places: {} };
@@ -235,6 +235,54 @@ var app =
 					});
 				}
 			};
+		}
+	, initializeGeoLocation: function()
+		{
+			var locationOptions = {
+				enableHighAccuracy: true,
+				maximumAge		  : 30000,
+				timeout			  : 27000
+			};
+			if(navigator.geolocation)
+				locationWatcher = navigator.geolocation.watchPosition(app.locationSuccess, app.locationError, locationOptions);
+			else
+				app.setPosition('Browser not supported','error');
+		}
+	, locationSuccess: function(coords)
+		{
+			app.currentArea = geoMath.placePoint(coords);
+			if(app.db.places[app.minDistance()])
+				app.setPosition(app.db.places[app.minDistance()],'found');
+			else
+				app.setPosition('Position aquired','found');
+		}
+	, locationError: function(error)
+		{
+			switch(error.code){
+				case error.PERMISSION_DENIED:
+					app.setPosition('Permission denied','error');
+					break;
+				case error.POSITION_UNAVAILABLE:
+					app.setPosition('Position not available','error');
+					break;
+				case error.TIMEOUT:
+					app.setPosition('Request timed out','error');
+					break;
+				case error.UNKNOWN_ERROR:
+					app.setPosition('Unknown error','error');
+					break;
+				}
+		}
+	, minDistance: function()
+		{
+			var i = 0;
+			var min;
+			for(i = 0; i == (app.db.nextId-1); i++)
+			{
+				if(geoMath.distance(app.db.places[i+1]) > geoMath.distance(app.db.places[i]))
+					min = geoMath.distance(app.db.places[i]);
+			}
+			alert('out of for');
 		}
 	};
 
