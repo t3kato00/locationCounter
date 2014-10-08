@@ -165,7 +165,7 @@ var app =
 						head("Test1") + coords(geoMath.nvect2coords(geoMath.coords2nvect({latitude: Math.PI/4, longitude: Math.PI/8}))) +
 						head("Test2") + coords(geoMath.placePlus({latitude:0, longitude:0, rangle: 0},{latitude:Math.PI/2, longitude:0, rangle: 0})) +
 						head("Test3") + coords(geoMath.placePlus({latitude:0, longitude:0, rangle: 0},{latitude: geoMath.meters2rangle(2000), longitude:0, rangle: 0})) +
-						head("Test4") + geoMath.distance({latitude:0, longitude:0},{latitude: geoMath.meters2rangle(2000), longitude:0}) + "<br>Should be 2000." +
+						head("Test4") + geoMath.distance({latitude:0, longitude:0, rangle: 0},{latitude: geoMath.meters2rangle(2000), longitude:0, rangle: 0}) + "<br>Should be 2000." +
 						head("Test5") + coords(geoMath.nvect2coords([0,0,1])) +
 						head("Test6") + coords(geoMath.nvect2coords([0,0,-1]));
 
