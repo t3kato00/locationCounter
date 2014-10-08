@@ -56,7 +56,36 @@ body {
 .activeTab {
 	background-color: #396C65;
 }
+.placeItem {
+	font-size:14pt;
+	display: flex; 
+	flex-direction: row;
+	align-items: stretch;
+	margin: 0;
+	padding: 0;
+}
+.statEdit {
+	margin: 0;
+	padding: 4pt;
+}
+.placeName {
+	padding: 2pt;
+	margin: 0;
+	flex-grow: 1;
+}
+.stEven {
+	background-color: #19D175;
+}
+.stOdd {
+	background-color: #14A75E;
+}
 
+#stNew {
+	text-align: center;
+	padding: 6pt;
+	background-color: #47B2B2;
+	width:100%;
+}
 #position {
 	display: none; 
 	width:100%;

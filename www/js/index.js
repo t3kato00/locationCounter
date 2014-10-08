@@ -41,10 +41,10 @@ var app =
 				app.setMain( '<b>Error! ' + url + ' (' + line + ')<br></b>' + msg);
 				return false;
 			};
-			app.initializeGeoLocation();
+			app.db = { nextId: 0, places: {} };
 			app.refreshTabs();
 			app.refreshActiveTab();
-			app.db = { nextId: 0, places: {} };
+			app.initializeGeoLocation();
 		}
 	, setPosition: function( inside, style )
 		{
@@ -70,9 +70,17 @@ var app =
 	, handlerOnTabClick: function(n)
 		{	return function()
 			{
+				var activeTab = app.tabs[app.activeTab];
 				if( app.activeTab == n )
-					return;
-
+					return;	
+				else if( activeTab.trans )
+				{
+					for(var i = app.activeTab; i < app.tabs.length-1; i += 1)
+						app.tabs[i] = app.tabs[i+1];
+					app.tabs.pop();
+					if( n > app.activeTab )
+						n -= 1;
+				}
 				app.activeTab = n;
 				app.refreshTabs();
 				app.tabs[n].show();
@@ -95,6 +103,16 @@ var app =
 			app.refreshTabs();
 			if(setActive)
 				app.refreshActiveTab();
+		}
+	, closeTab: function()
+		{
+			for(var i = app.activeTab; i < app.tabs.length-1; i += 1)
+				app.tabs[i] = app.tabs[i+1];
+				
+			app.tabs.pop();
+			app.activeTab = 0;
+			app.refreshTabs();
+			app.refreshActiveTab();
 		}
 	, refreshTabs: function()
 		{
@@ -126,10 +144,25 @@ var app =
 			, show: function()
 				{
 					var contents = '';
-					contents += '<button type="button" id="stNew">New place</button>';
+					var n = 0;
+					for( var placeId in app.db.places )
+					{
+						var evenOdd = n % 2 ? 'stOdd' : 'stEven';
+						var place = app.db.places[placeId];
+						contents += '<div class="placeItem ' + evenOdd + '"><span class="placeName">' + (place.name || 'Unnamed') + '</span><a id="statEdit' + placeId + '" class="statEdit">Edit</a></div>';
+						n += 1;
+					}
+					contents += '<div id="stNew">New Place</div>';
 
 					app.setMain(contents);
-
+					for( var placeId in app.db.places )
+					{
+						var place = app.db.places[placeId];
+						$('#statEdit' + placeId).on("click", function() {
+							app.newTab(app.addModifyPlaceTab(place),true);
+						});
+					}
+					
 					$('#stNew').on("click", function() {
 						app.newTab(app.addModifyPlaceTab({}),true);
 					});
@@ -198,28 +231,36 @@ var app =
 		}
 	, addModifyPlaceTab: function(place)
 		{
-			return { name: place.name, show: function()
+			if(!place.name)
+				place.name = '';
+			return { name: place.name, trans: true, show: function()
 				{
 					var contents = '<table>';
 
-					contents += '<tr><td>Name</td><td><input type="text" id="amptName"></td></tr>';
+					contents += '<tr><td>Name</td><td><input type="text" id="amptName" value="' + place.name + '" ></td></tr>';
 					if( place.area )
 						contents += app.coordinateTable(place.area);
 					contents += '</table>';
 					contents += '<button type="button" id="amptExpand">Expand Area</button>';
-
+					contents += '<button type="button" id="amptClose">Close Tab</button>';
+					
 					app.setMain(contents);
 
 					$('#amptName').on("input", function() {
 					  	var name = $('#amptName').val();
-						if(! place.id )
+						place.name = name;
+						if(! place.hasOwnProperty('id') && name !== '')
 						{
 							place.id = app.db.nextId;
 							app.db.nextId += 1;
 							app.db.places[place.id] = place;
 						}
-						place.name = name;
-						app.renameActiveTab(name);
+						if(place.hasOwnProperty('id') && name === '')
+						{
+							delete app.db.places[place.id];
+							delete place.id;
+						}
+						app.renameActiveTab(name || 'Unnamed');
 					});
 					$('#amptExpand').on("click", function() {
 						if( app.currentArea )
@@ -232,6 +273,9 @@ var app =
 						}
 						else
 							alert("No location information currently available!");
+					});
+					$('#amptClose').on("click", function() {
+						app.closeTab();
 					});
 				}
 			};
@@ -287,7 +331,7 @@ var app =
 				}
 			}
 			if(minDistance < 0)
-				app.setPosition(place.name,'found');
+				app.setPosition(place.name || 'Unnamed','found');
 			else
 				app.setPosition();
 		}
