@@ -65,6 +65,9 @@ body {
 	padding: 0;
 }
 .statEdit {
+	background-color: #47B2B2;
+	border-style: solid;
+	border-width: 1px;
 	margin: 0;
 	padding: 4pt;
 }
@@ -80,10 +83,12 @@ body {
 	background-color: #14A75E;
 }
 
-#stNew {
+.button {
 	text-align: center;
 	padding: 6pt;
 	background-color: #47B2B2;
+	border-style: solid;
+	border-width: 1px;
 	width:100%;
 }
 #position {

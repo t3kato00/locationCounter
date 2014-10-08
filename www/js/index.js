@@ -41,7 +41,7 @@ var app =
 				app.setMain( '<b>Error! ' + url + ' (' + line + ')<br></b>' + msg);
 				return false;
 			};
-			app.db = { nextId: 0, places: {} };
+			app.loadDatabase();
 			app.refreshTabs();
 			app.refreshActiveTab();
 			app.initializeGeoLocation();
@@ -152,7 +152,8 @@ var app =
 						contents += '<div class="placeItem ' + evenOdd + '"><span class="placeName">' + (place.name || 'Unnamed') + '</span><a id="statEdit' + placeId + '" class="statEdit">Edit</a></div>';
 						n += 1;
 					}
-					contents += '<div id="stNew">New Place</div>';
+					contents += '<div id="stNew" class="button">New Place</div>';
+					contents += '<div id="stReset" class="button">Reset Database</div>';
 
 					app.setMain(contents);
 					for( var placeId in app.db.places )
@@ -165,6 +166,12 @@ var app =
 					
 					$('#stNew').on("click", function() {
 						app.newTab(app.addModifyPlaceTab({}),true);
+					});
+					
+					$('#stReset').on("click", function() {
+						app.newDatabase();
+						app.saveDatabase();
+						app.refreshActiveTab();
 					});
 				}
 			}
@@ -241,8 +248,8 @@ var app =
 					if( place.area )
 						contents += app.coordinateTable(place.area);
 					contents += '</table>';
-					contents += '<button type="button" id="amptExpand">Expand Area</button>';
-					contents += '<button type="button" id="amptClose">Close Tab</button>';
+					contents += '<div id="amptExpand" class="button">Include current position</div>'
+					contents += '<div id="amptDelete" class="button">Delete Place</div>';
 					
 					app.setMain(contents);
 
@@ -254,11 +261,13 @@ var app =
 							place.id = app.db.nextId;
 							app.db.nextId += 1;
 							app.db.places[place.id] = place;
+							app.saveDatabase();
 						}
-						if(place.hasOwnProperty('id') && name === '')
+						else if(place.hasOwnProperty('id') && name === '')
 						{
 							delete app.db.places[place.id];
 							delete place.id;
+							app.saveDatabase();
 						}
 						app.renameActiveTab(name || 'Unnamed');
 					});
@@ -274,7 +283,13 @@ var app =
 						else
 							alert("No location information currently available!");
 					});
-					$('#amptClose').on("click", function() {
+					$('#amptDelete').on("click", function() {
+						if(place.hasOwnProperty('id'))
+						{
+							delete app.db.places[place.id];
+							delete place.id;
+							app.saveDatabase();
+						}
 						app.closeTab();
 					});
 				}
@@ -334,6 +349,42 @@ var app =
 				app.setPosition(place.name || 'Unnamed','found');
 			else
 				app.setPosition();
+		}
+	, saveDatabase: function()
+		{
+			if( typeof(Storage) === "undefined" )
+				return;
+			var st = window.localStorage;
+			st.setItem('Location Database', JSON.stringify( app.db ));
+		}
+	, loadDatabase: function()
+		{
+			if( typeof(Storage) === "undefined" )
+			{
+				alert('Local storage not supported');
+				app.newDatabase();
+				return;
+			}
+			var db = localStorage.getItem('Location Database');
+			if( !db )
+			{
+				app.newDatabase();
+				return;
+			}
+			try 
+			{
+				db = JSON.parse( db );
+			}
+			catch(err)
+			{
+				alert('Corrupted Database ' + err.message);
+				app.newDatabase();
+			}
+			app.db = db;
+		}
+	, newDatabase: function()
+		{
+			app.db = { nextId: 0, places: {} };
 		}
 	};
 
