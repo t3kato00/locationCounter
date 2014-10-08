@@ -76,6 +76,9 @@ body {
 #position.found {
 	background-color: #30D030;
 }
+#position.success {
+	background-color: #008A00;
+}
 
 
 #tabs {

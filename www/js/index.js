@@ -227,7 +227,7 @@ var app =
 							if( place.area )
 								place.area = geoMath.placePlus(place.area,app.currentArea);
 							else
-								place.area = geoMath.currentArea;
+								place.area = app.currentArea;
 							app.refreshActiveTab();
 						}
 						else
@@ -250,11 +250,8 @@ var app =
 		}
 	, locationSuccess: function(coords)
 		{
-			app.currentArea = geoMath.placePoint(coords);
-			if(app.db.places[app.minDistance()])
-				app.setPosition(app.db.places[app.minDistance()],'found');
-			else
-				app.setPosition('Position aquired','found');
+			app.currentArea = geoMath.placePoint(coords.coords);
+			app.updatePosition();
 		}
 	, locationError: function(error)
 		{
@@ -273,16 +270,26 @@ var app =
 					break;
 				}
 		}
-	, minDistance: function()
+	, updatePosition: function()
 		{
-			var i = 0;
-			var min;
-			for(i = 0; i == (app.db.nextId-1); i++)
+			var minDistance = null;
+			var minPlace;
+			for( var placeId in app.db.places )
 			{
-				if(geoMath.distance(app.db.places[i+1]) > geoMath.distance(app.db.places[i]))
-					min = geoMath.distance(app.db.places[i]);
+				var place = app.db.places[placeId];
+				if(!place.area)
+					continue;
+				var currentDistance = geoMath.distance(app.currentArea,place.area);
+				if(currentDistance === null || currentDistance < minDistance)
+				{
+					minDistance = currentDistance;
+					minPlace = place;
+				}
 			}
-			alert('out of for');
+			if(minDistance < 0)
+				app.setPosition(place.name,'found');
+			else
+				app.setPosition();
 		}
 	};
 
