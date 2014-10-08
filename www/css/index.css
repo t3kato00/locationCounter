@@ -56,6 +56,7 @@ body {
 .activeTab {
 	background-color: #396C65;
 }
+
 .placeItem {
 	font-size:14pt;
 	display: flex; 
@@ -64,6 +65,20 @@ body {
 	margin: 0;
 	padding: 0;
 }
+
+.placeName {
+	padding: 2pt;
+	margin: 0;
+	flex-grow: 1;
+}
+
+.placeTime {
+	padding: 2pt;
+	margin: 0;
+	text-align: right;
+	flex-grow: 1;
+}
+
 .statEdit {
 	background-color: #47B2B2;
 	border-style: solid;
@@ -71,11 +86,7 @@ body {
 	margin: 0;
 	padding: 4pt;
 }
-.placeName {
-	padding: 2pt;
-	margin: 0;
-	flex-grow: 1;
-}
+
 .stEven {
 	background-color: #19D175;
 }
@@ -89,8 +100,33 @@ body {
 	background-color: #47B2B2;
 	border-style: solid;
 	border-width: 1px;
-	width:100%;
 }
+
+table.propertyTable {
+	display: block;
+	width: 100%
+	margin: 0;
+	padding: 0;
+}
+
+table.propertyTable th {
+	font-weight: bold;
+}
+
+table.propertyTable  {
+	font-weight: bold;
+}
+
+.center {
+	text-align: center;
+}
+
+td.property {
+	text-align: right;
+	padding-right: 6pt;
+	padding-left: 4pt;
+}
+
 #position {
 	display: none; 
 	width:100%;
@@ -128,14 +164,20 @@ body {
 }
 
 #main {
+	width: 100%;
+	margin: 0;
+	padding: 0;
 	height: 0;
 	overflow: visible;
 }
 
 #mainContainer {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	-webkit-overflow-scrolling: touch;
 	overflow-x: hidden;
 	overflow-y: scroll;
-	-webkit-overflow-scrolling: touch;
 	background-color: #396C65;
 	flex-grow: 1;
 }

@@ -39,6 +39,7 @@ var app =
 			app.positionStatus = '';
 			window.onerror = function myErrorHandler(msg, url, line) {
 				app.setMain( '<b>Error! ' + url + ' (' + line + ')<br></b>' + msg);
+				app.setFooter();
 				return false;
 			};
 			app.loadDatabase();
@@ -137,10 +138,41 @@ var app =
 		}
 	, setMain: function( inside )
 		{
+			if(! inside )
+				inside = '';
 			$('#main').html(inside);
 		}
+	, setFooter: function( inside )
+		{
+			if(! inside )
+				inside = '';
+			$('#footer').html(inside);
+		}
 	, tabs:
-		[	{ name: "Statistics"
+		[	{ name: "Info"
+			, show: function()
+				{
+					contents += '<table class="propertyTable">';
+					var contents = '';
+					if( app.currentArea )
+					{
+						contents += '<tr><th colspan="2" class="center">Phone coordinates</th><tr>'
+						contents += app.coordinateTable(app.currentArea);
+					}
+					if( app.currentPlace )
+					{
+						contents += '<tr><th colspan="2" class="center">Current place</th><tr>'
+						contents += '<tr><td colspan="2" class="center">' + app.currentPlace.name + '</th><tr>'
+						contents += app.coordinateTable(app.currentPlace.area);
+						contents += '<tr><td class="property">Time</td><td>' + app.showTime(app.currentPlace.time) + '</td></tr>';
+					}
+					contents += '</table>';
+
+					app.setMain(contents);
+					app.setFooter();
+				}
+			}
+		,	{ name: "Statistics"
 			, show: function()
 				{
 					var contents = '';
@@ -149,13 +181,17 @@ var app =
 					{
 						var evenOdd = n % 2 ? 'stOdd' : 'stEven';
 						var place = app.db.places[placeId];
-						contents += '<div class="placeItem ' + evenOdd + '"><span class="placeName">' + (place.name || 'Unnamed') + '</span><a id="statEdit' + placeId + '" class="statEdit">Edit</a></div>';
+						contents += '<div class="placeItem ' + evenOdd + '"><span class="placeName">' + place.name + '</span><span class="placeTime">' + app.showTime(place.time) + '</span><a id="statEdit' + placeId + '" class="statEdit">Edit</a></div>';
 						n += 1;
 					}
-					contents += '<div id="stNew" class="button">New Place</div>';
-					contents += '<div id="stReset" class="button">Reset Database</div>';
 
 					app.setMain(contents);
+
+					contents = '';
+					contents += '<div id="stNew" class="button">New Place</div>';
+					contents += '<div id="stReset" class="button">Reset Database</div>';
+					app.setFooter(contents);
+
 					for( var placeId in app.db.places )
 					{
 						var place = app.db.places[placeId];
@@ -175,83 +211,44 @@ var app =
 					});
 				}
 			}
-		,	{ name: "Debug"
-			, show: function()
-				{
-					var sect = function(text) {
-						return '<h2>' + text + '</h2>';
-					}
-					var head = function(text) {
-						return '<h3>' + text + '</h3>';
-					}
-					var coords = function(coords) {
-						var result = '<table>' +
-							'<tr><td>Latitude</td><td>' + geoMath.rad2deg(coords.latitude) + '</td></tr>' +
-							'<tr><td>Longitude</td><td>' + geoMath.rad2deg(coords.longitude) + '</td></tr>';
-
-						if('accuracy' in coords)
-							result += '<tr><td>Radius</td><td>' + coords.accurary + '</td></tr>';
-						else if('rangle' in coords)
-							result += '<tr><td>Radius</td><td>' + geoMath.rangle2meters(coords.rangle) + '</td></tr>';
-
-						result += '</table>';
-						return result;
-					}
-					var contents = "";
-
-					//if(false)
-					contents +=
-						sect("GeoMath") +
-						head("Test1") + coords(geoMath.nvect2coords(geoMath.coords2nvect({latitude: Math.PI/4, longitude: Math.PI/8}))) +
-						head("Test2") + coords(geoMath.placePlus({latitude:0, longitude:0, rangle: 0},{latitude:Math.PI/2, longitude:0, rangle: 0})) +
-						head("Test3") + coords(geoMath.placePlus({latitude:0, longitude:0, rangle: 0},{latitude: geoMath.meters2rangle(2000), longitude:0, rangle: 0})) +
-						head("Test4") + geoMath.distance({latitude:0, longitude:0, rangle: 0},{latitude: geoMath.meters2rangle(2000), longitude:0, rangle: 0}) + "<br>Should be 2000." +
-						head("Test5") + coords(geoMath.nvect2coords([0,0,1])) +
-						head("Test6") + coords(geoMath.nvect2coords([0,0,-1]));
-
-					contents +=
-						sect("Position") +
-						head("Test") + '<a id="normalPos">normal</a> <a id="errorPos">error</a> <a id="pendingPos">pending</a> <a id="foundPos">found</a> <a id="clearPos">clear</a>';
-
-					app.setMain( contents );
-					$('#normalPos').on("click", function() { app.setPosition('Test') });
-					$('#errorPos').on("click", function() { app.setPosition('Error', 'error') });
-					$('#pendingPos').on("click", function() { app.setPosition('Pending', 'pending') });
-					$('#foundPos').on("click", function() { app.setPosition('Found', 'found') });
-					$('#clearPos').on("click", function() { app.setPosition() });
-				}
-			}
 		]
 	// Currently active tab.
 	, activeTab: 0
 	, coordinateTable: function(coords) {
 			var result =
-				'<tr><td>Latitude</td><td>' + geoMath.rad2deg(coords.latitude) + '</td></tr>' +
-				'<tr><td>Longitude</td><td>' + geoMath.rad2deg(coords.longitude) + '</td></tr>';
+				'<tr><td class="property">Latitude</td><td>' + geoMath.rad2deg(coords.latitude) + '</td></tr>' +
+				'<tr><td class="property">Longitude</td><td>' + geoMath.rad2deg(coords.longitude) + '</td></tr>';
 
 			if('accuracy' in coords)
-				result += '<tr><td>Radius</td><td>' + coords.accurary + '</td></tr>';
+				result += '<tr><td class="property">Radius</td><td>' + coords.accurary + '</td></tr>';
 			else if('rangle' in coords)
-				result += '<tr><td>Radius</td><td>' + geoMath.rangle2meters(coords.rangle) + '</td></tr>';
+				result += '<tr><td class="property">Radius</td><td>' + geoMath.rangle2meters(coords.rangle) + '</td></tr>';
 
 			return result;
 		}
 	, addModifyPlaceTab: function(place)
 		{
-			if(!place.name)
+			if(!place.hasOwnProperty('name'))
 				place.name = '';
+			if(!place.hasOwnProperty('time'))
+				place.time = 0;
 			return { name: place.name, trans: true, show: function()
 				{
-					var contents = '<table>';
+					var contents = '<table class="propertyTable">';
 
-					contents += '<tr><td>Name</td><td><input type="text" id="amptName" value="' + place.name + '" ></td></tr>';
+					contents += '<tr><td class="property">Name</td><td><input type="text" id="amptName" value="' + place.name + '" ></td></tr>';
 					if( place.area )
 						contents += app.coordinateTable(place.area);
+					contents += '<tr><td class="property">Time</td><td>' + app.showTime(place.time) + '</td></tr>';
 					contents += '</table>';
-					contents += '<div id="amptExpand" class="button">Include current position</div>'
-					contents += '<div id="amptDelete" class="button">Delete Place</div>';
 					
 					app.setMain(contents);
+
+					contents = '';
+					contents += '<div id="amptExpand" class="button">Include current position</div>'
+					contents += '<div id="amptDelete" class="button">Delete Place</div>';
+
+					app.setFooter(contents);
 
 					$('#amptName').on("input", function() {
 					  	var name = $('#amptName').val();
@@ -278,6 +275,7 @@ var app =
 								place.area = geoMath.placePlus(place.area,app.currentArea);
 							else
 								place.area = app.currentArea;
+							app.saveDatabase();
 							app.refreshActiveTab();
 						}
 						else
@@ -310,27 +308,52 @@ var app =
 	, locationSuccess: function(coords)
 		{
 			app.currentArea = geoMath.placePoint(coords.coords);
-			app.updatePosition();
+			delete app.locationError;
+			//app.updatePosition(coords.timestamp);
+			app.updatePosition(new Date().getTime());
 		}
 	, locationError: function(error)
 		{
+			delete app.currentArea;
+
 			switch(error.code){
 				case error.PERMISSION_DENIED:
-					app.setPosition('Permission denied','error');
+					app.locationError ='Permission denied';
 					break;
 				case error.POSITION_UNAVAILABLE:
-					app.setPosition('Position not available','error');
+					app.locationError ='Position not available';
 					break;
 				case error.TIMEOUT:
-					app.setPosition('Request timed out','error');
+					app.locationError ='Request timed out';
 					break;
 				case error.UNKNOWN_ERROR:
-					app.setPosition('Unknown error','error');
+					app.locationError ='Unknown error';
 					break;
 				}
+			app.updatePosition(new Date().getTime());
 		}
-	, updatePosition: function()
+	, updatePosition: function(newTime)
 		{
+			var oldTime;
+			if( app.hasOwnProperty('oldPositionTime') )
+				oldTime = app.oldPositionTime;
+			else
+				oldTime = newTime;
+
+			if( app.hasOwnProperty('currentPlace') )
+			{
+				app.currentPlace.time += newTime - oldTime;
+				app.saveDatabase();
+			}
+
+			if(!app.hasOwnProperty('currentArea'))
+			{
+				delete app.currentPlace;
+				delete app.oldPositionTime;
+				app.setPosition(app.locationError,'error');
+				return;
+			}
+
 			var minDistance = null;
 			var minPlace;
 			for( var placeId in app.db.places )
@@ -346,9 +369,53 @@ var app =
 				}
 			}
 			if(minDistance < 0)
+			{
+				app.currentPlace = place;
+				app.oldPositionTime = newTime;
 				app.setPosition(place.name || 'Unnamed','found');
+			}
 			else
+			{
+				delete app.currentPlace;
 				app.setPosition();
+			}
+			if(app.activeTab == 0)
+				app.refreshActiveTab();
+		}
+	, showTime: function(time)
+		{
+			time = Math.floor(time);
+			var second = 1000;
+			var minute = 60*second;
+			var hour = 60*minute;
+			var day = 24*hour;
+
+			var days = Math.floor(time / day);
+			time = time % day;
+			var hours = Math.floor(time / hour);
+			time = time % hour;
+			var minutes = Math.floor(time / minute);
+			time = time % minute;
+			var seconds = Math.floor(time / second);
+
+			var result = '';
+			if( days )
+			{
+				result += days + 'd';
+				if( hours || minutes )
+					result += ' ';
+			}
+			if( hours )
+			{
+				result += hours + 'h';
+				if( minutes )
+					result += ' ';
+			}
+			if( minutes )
+				result += minutes + 'min';
+			if( !days && !hours && !minutes )
+				result += seconds + 's';
+			return result;
 		}
 	, saveDatabase: function()
 		{
