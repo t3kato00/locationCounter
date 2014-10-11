@@ -192,13 +192,13 @@ var app =
 					contents += '<div id="stReset" class="button">Reset Database</div>';
 					app.setFooter(contents);
 
-					for( var placeId in app.db.places )
-					{
-						var place = app.db.places[placeId];
+					function handler(placeId) {
 						$('#statEdit' + placeId).on("click", function() {
-							app.newTab(app.addModifyPlaceTab(place),true);
+							app.newTab(app.addModifyPlaceTab(app.db.places[placeId]),true);
 						});
 					}
+					for( var placeId in app.db.places )
+						handler(placeId);
 					
 					$('#stNew').on("click", function() {
 						app.newTab(app.addModifyPlaceTab({}),true);
@@ -282,6 +282,11 @@ var app =
 							alert("No location information currently available!");
 					});
 					$('#amptDelete').on("click", function() {
+						if(app.currentPlace == place)
+						{
+							delete app.currentPlace;
+							app.updatePosition(new Date().getTime());
+						}
 						if(place.hasOwnProperty('id'))
 						{
 							delete app.db.places[place.id];
@@ -318,16 +323,16 @@ var app =
 
 			switch(error.code){
 				case error.PERMISSION_DENIED:
-					app.locationError ='Permission denied';
+					app.locationError = 'Permission denied';
 					break;
 				case error.POSITION_UNAVAILABLE:
-					app.locationError ='Position not available';
+					app.locationError = 'Position not available';
 					break;
 				case error.TIMEOUT:
-					app.locationError ='Request timed out';
+					app.locationError = 'Request timed out';
 					break;
 				case error.UNKNOWN_ERROR:
-					app.locationError ='Unknown error';
+					app.locationError = 'Unknown error';
 					break;
 				}
 			app.updatePosition(new Date().getTime());

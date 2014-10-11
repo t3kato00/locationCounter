@@ -56,7 +56,7 @@ var geoMath =
 		}
 	, placePoint: function(coord)
 		{
-			if(!coord.latitude || !coord.longitude)
+			if(!coord.hasOwnProperty('latitude') || !coord.hasOwnProperty('longitude'))
 				alert('Invalid coord');
 			var result = { latitude: this.deg2rad(coord.latitude), longitude: this.deg2rad(coord.longitude), rangle: 0 };
 			if('accuracy' in coord)
