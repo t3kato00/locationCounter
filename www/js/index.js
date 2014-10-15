@@ -237,7 +237,7 @@ var app =
 					var contents = '<table class="propertyTable">';
 
 					contents += '<tr><td class="property">Name</td><td><input type="text" id="amptName" value="' + place.name + '" ></td></tr>';
-					if( place.area )
+					if( place.hasOwnProperty('area') )
 						contents += app.coordinateTable(place.area);
 					contents += '<tr><td class="property">Time</td><td>' + app.showTime(place.time) + '</td></tr>';
 					contents += '</table>';
@@ -364,20 +364,22 @@ var app =
 			for( var placeId in app.db.places )
 			{
 				var place = app.db.places[placeId];
-				if(!place.area)
+				if(!place.hasOwnProperty('area'))
 					continue;
 				var currentDistance = geoMath.distance(app.currentArea,place.area);
-				if(currentDistance === null || currentDistance < minDistance)
+				//alert('Place: ' + place.name + ' ' + currentDistance);
+				if(currentDistance < minDistance)
 				{
+					//alert('Selected!');
 					minDistance = currentDistance;
 					minPlace = place;
 				}
 			}
 			if(minDistance < 0)
 			{
-				app.currentPlace = place;
+				app.currentPlace = minPlace;
 				app.oldPositionTime = newTime;
-				app.setPosition(place.name || 'Unnamed','found');
+				app.setPosition(minPlace.name || 'Unnamed','found');
 			}
 			else
 			{
