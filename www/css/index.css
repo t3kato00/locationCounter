@@ -27,17 +27,20 @@ html {
 }
 body {
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
-    -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
-    -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
-    background-color: red; /* #E4E4E4; */
+    -webkit-text-size-adjust: none;				/* prevent webkit from resizing text to fit */
+	-webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
+    background-color: #396C65;
     font-family:'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
     font-size:12pt;
     width:100%;
     height:100%;
     margin:0px;
     padding:0px;
+	display: -ms-flexbox;
 	display: flex; 
+	-ms-flex-direction: column;
 	flex-direction: column;
+	-ms-flex-align: stretch;
 	align-items: stretch;
 }
 
@@ -45,6 +48,7 @@ body {
 	text-align: center;
 	padding: 2pt;
 	margin: 0;
+	-ms-flex: 1 auto;
 	flex-grow: 1;
 }
 .tabSwitcherEven{
@@ -59,8 +63,11 @@ body {
 
 .placeItem {
 	font-size:14pt;
+	display: -ms-flexbox;
 	display: flex; 
+	-ms-flex-direction: row;
 	flex-direction: row;
+	-ms-flex-align: stretch;
 	align-items: stretch;
 	margin: 0;
 	padding: 0;
@@ -69,6 +76,7 @@ body {
 .placeName {
 	padding: 2pt;
 	margin: 0;
+	-ms-flex: 1 auto;
 	flex-grow: 1;
 }
 
@@ -76,6 +84,7 @@ body {
 	padding: 2pt;
 	margin: 0;
 	text-align: right;
+	-ms-flex: 1 auto;
 	flex-grow: 1;
 }
 
@@ -104,7 +113,7 @@ body {
 
 table.propertyTable {
 	display: block;
-	width: 100%
+	width: 100%;
 	margin: 0;
 	padding: 0;
 }
@@ -152,11 +161,14 @@ td.property {
 
 
 #tabs {
+	display: -ms-flexbox;
 	display: flex; 
 	width:100%;
 	margin: 0;
 	padding: 0;
+	-ms-flex-direction: row;
 	flex-direction: row;
+	-ms-flex-align: stretch;
 	align-items: stretch;
 	background-color: #E4E4E4;
 	font-size:14pt;
@@ -179,6 +191,7 @@ td.property {
 	overflow-x: hidden;
 	overflow-y: scroll;
 	background-color: #396C65;
+	-ms-flex: 1 auto;
 	flex-grow: 1;
 }
 
